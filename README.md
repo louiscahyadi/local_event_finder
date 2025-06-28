@@ -1,16 +1,24 @@
-# local_event_finder_fixed
+# Local Event Finder
 
-A new Flutter project.
+Aplikasi Flutter untuk mencari dan menambahkan event lokal berdasarkan lokasi pengguna.
 
-## Getting Started
+## Fitur Utama
 
-This project is a starting point for a Flutter application.
+- Autentikasi pengguna (Login & Register)
+- Tambah dan edit event
+- Pemilihan lokasi event menggunakan peta (Google Maps)
+- Penyimpanan data lokal dengan SQLite
+- State management menggunakan Provider
 
-A few resources to get you started if this is your first Flutter project:
+## Tampilan
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+> (Tambahkan screenshot di sini jika ada)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Struktur Folder
+
+lib/
+├── models/ # Struktur data (model Event, User)
+├── providers/ # Provider untuk User dan Event
+├── screens/ # Semua tampilan layar (login, home, register, dsb)
+├── widgets/ # Komponen UI terpisah (opsional)
+├── main.dart # Entry point aplikasi
