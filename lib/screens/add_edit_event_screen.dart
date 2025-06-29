@@ -1,10 +1,21 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/event.dart';
 import '../providers/event_provider.dart';
 import 'location_picker_screen.dart';
+
+const List<String> _kategoriList = [
+  'Musik',
+  'Kuliner',
+  'Olahraga',
+  'Seni',
+  'Pendidikan',
+  'Lainnya',
+];
 
 class AddEditEventScreen extends StatefulWidget {
   final Event? event;
@@ -27,6 +38,8 @@ class _AddEditEventScreenState extends State<AddEditEventScreen> {
   final _emailController = TextEditingController();
   double? latitude;
   double? longitude;
+  String? _selectedKategori;
+  File? _imageFile;
 
   @override
   void initState() {
@@ -38,6 +51,8 @@ class _AddEditEventScreenState extends State<AddEditEventScreen> {
       latitude = widget.event!.latitude;
       longitude = widget.event!.longitude;
       _locationController.text = 'Lat: ${latitude}, Lng: ${longitude}';
+      // Jika ada field kategori di event, set juga _selectedKategori
+      // _selectedKategori = widget.event!.kategori;
     }
   }
 
@@ -51,6 +66,18 @@ class _AddEditEventScreenState extends State<AddEditEventScreen> {
     if (pickedDate != null) {
       setState(() {
         _dateController.text = DateFormat('dd MMM yyyy').format(pickedDate);
+      });
+    }
+  }
+
+  Future<void> _pickTime() async {
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (pickedTime != null) {
+      setState(() {
+        _timeController.text = pickedTime.format(context);
       });
     }
   }
@@ -70,6 +97,16 @@ class _AddEditEventScreenState extends State<AddEditEventScreen> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() {
+        _imageFile = File(picked.path);
+      });
+    }
+  }
+
   void _saveEvent() {
     if (_formKey.currentState!.validate()) {
       final newEvent = Event(
@@ -79,6 +116,8 @@ class _AddEditEventScreenState extends State<AddEditEventScreen> {
         date: _dateController.text,
         latitude: latitude ?? 0.0,
         longitude: longitude ?? 0.0,
+        imagePath: _imageFile?.path ?? widget.event?.imagePath,
+        kategori: _selectedKategori, // aktifkan baris ini
       );
 
       final eventProvider = Provider.of<EventProvider>(context, listen: false);
@@ -86,7 +125,7 @@ class _AddEditEventScreenState extends State<AddEditEventScreen> {
       if (widget.event == null) {
         eventProvider.addEvent(newEvent);
       } else {
-        eventProvider.updateEvent(widget.event!.id!, newEvent);
+        eventProvider.updateEvent(widget.event!.id!.toString(), newEvent);
       }
 
       Navigator.pop(context);
@@ -128,20 +167,38 @@ class _AddEditEventScreenState extends State<AddEditEventScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Container(
-              height: 150,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.camera_alt, color: Colors.grey),
-                    SizedBox(height: 8),
-                    Text('Tambahkan Foto Event'),
-                  ],
+            GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                height: 150,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: InkWell(
+                  onTap: _pickImage,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Center(
+                    child:
+                        _imageFile == null
+                            ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.camera_alt, color: Colors.grey),
+                                SizedBox(height: 8),
+                                Text('Tambahkan Foto Event'),
+                              ],
+                            )
+                            : ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(
+                                _imageFile!,
+                                width: double.infinity,
+                                height: 150,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                  ),
                 ),
               ),
             ),
@@ -155,11 +212,29 @@ class _AddEditEventScreenState extends State<AddEditEventScreen> {
             ),
             SizedBox(height: 12),
 
-            TextFormField(
+            // Ganti TextFormField kategori dengan DropdownButtonFormField
+            DropdownButtonFormField<String>(
+              value: _selectedKategori,
               decoration: _inputDecoration('Kategori', icon: Icons.category),
+              items:
+                  _kategoriList
+                      .map(
+                        (kategori) => DropdownMenuItem(
+                          value: kategori,
+                          child: Text(kategori),
+                        ),
+                      )
+                      .toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedKategori = value;
+                });
+              },
               validator:
                   (value) =>
-                      value!.isEmpty ? 'Kategori tidak boleh kosong' : null,
+                      value == null || value.isEmpty
+                          ? 'Kategori tidak boleh kosong'
+                          : null,
             ),
             SizedBox(height: 12),
 
@@ -183,11 +258,19 @@ class _AddEditEventScreenState extends State<AddEditEventScreen> {
                 ),
                 SizedBox(width: 12),
                 Expanded(
-                  child: TextFormField(
-                    controller: _timeController,
-                    decoration: _inputDecoration('Waktu'),
-                    validator:
-                        (value) => value!.isEmpty ? 'Waktu wajib diisi' : null,
+                  child: GestureDetector(
+                    onTap: _pickTime,
+                    child: AbsorbPointer(
+                      child: TextFormField(
+                        controller: _timeController,
+                        decoration: _inputDecoration(
+                          'Waktu',
+                        ).copyWith(suffixIcon: Icon(Icons.access_time)),
+                        validator:
+                            (value) =>
+                                value!.isEmpty ? 'Waktu wajib diisi' : null,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -252,4 +335,20 @@ class _AddEditEventScreenState extends State<AddEditEventScreen> {
       ),
     );
   }
+}
+
+Widget buildEventImage(Event event) {
+  return Container(
+    height: 150,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(12),
+      image: DecorationImage(
+        image:
+            event.imagePath != null
+                ? FileImage(File(event.imagePath!))
+                : AssetImage('assets/default_event.jpg') as ImageProvider,
+        fit: BoxFit.cover,
+      ),
+    ),
+  );
 }
