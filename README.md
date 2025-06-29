@@ -10,10 +10,6 @@ Aplikasi Flutter untuk mencari dan menambahkan event lokal berdasarkan lokasi pe
 - Penyimpanan data lokal dengan SQLite
 - State management menggunakan Provider
 
-## Tampilan
-
-> (Tambahkan screenshot di sini jika ada)
-
 ## Struktur Folder
 
 lib/
