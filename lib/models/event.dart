@@ -1,5 +1,5 @@
 class Event {
-  final String? id; // ID boleh null (saat tambah event baru)
+  final String? id;
   final String title;
   final String description;
   final String date;
@@ -7,13 +7,15 @@ class Event {
   final double longitude;
 
   Event({
-    this.id, // tambahkan parameter id di sini
+    this.id,
     required this.title,
     required this.description,
     required this.date,
     required this.latitude,
     required this.longitude,
   });
+
+  String get location => '$latitude, $longitude';
 
   factory Event.fromMap(Map<String, dynamic> map) {
     return Event(
