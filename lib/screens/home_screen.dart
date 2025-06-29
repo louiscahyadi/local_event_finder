@@ -3,8 +3,75 @@ import 'package:provider/provider.dart';
 import '../providers/event_provider.dart';
 import 'add_edit_event_screen.dart';
 import 'event_detail_screen.dart';
+import 'profile_screen.dart';
+import 'dart:io';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _screens = [HomeScreenContent(), ProfileScreen()];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedFontSize: 14,
+        unselectedFontSize: 13,
+        iconSize: 28,
+        selectedItemColor: Colors.blue[800],
+        unselectedItemColor: Colors.grey[500],
+        elevation: 8,
+        items: [
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: EdgeInsets.only(bottom: 2),
+              child: Icon(Icons.home),
+            ),
+            label: 'Beranda',
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: EdgeInsets.only(bottom: 2),
+              child: Icon(Icons.person),
+            ),
+            label: 'Profil',
+          ),
+        ],
+      ),
+      floatingActionButton:
+          _selectedIndex == 0
+              ? FloatingActionButton(
+                backgroundColor: Colors.redAccent,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => AddEditEventScreen()),
+                  );
+                },
+                child: Icon(Icons.add),
+              )
+              : null,
+    );
+  }
+}
+
+// Pindahkan seluruh isi build HomeScreen ke widget baru:
+class HomeScreenContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final eventProvider = Provider.of<EventProvider>(context);
@@ -88,25 +155,6 @@ class HomeScreen extends StatelessWidget {
                 .toList(),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Jelajah'),
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Event Saya'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.redAccent,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => AddEditEventScreen()),
-          );
-        },
-        child: Icon(Icons.add),
       ),
     );
   }
@@ -214,12 +262,20 @@ class HomeScreen extends StatelessWidget {
       child: ListTile(
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            'https://images.unsplash.com/photo-1536254425523-2cf41187bd35?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-            width: 60,
-            height: 60,
-            fit: BoxFit.cover,
-          ),
+          child:
+              (event.imagePath != null && event.imagePath!.isNotEmpty)
+                  ? Image.file(
+                    File(event.imagePath!),
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                  )
+                  : Image.asset(
+                    'assets/default_event.jpg',
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                  ),
         ),
         title: Text(event.title),
         subtitle: Column(
