@@ -16,5 +16,4 @@ lib/
 ├── models/ # Struktur data (model Event, User)
 ├── providers/ # Provider untuk User dan Event
 ├── screens/ # Semua tampilan layar (login, home, register, dsb)
-├── widgets/ # Komponen UI terpisah (opsional)
 ├── main.dart # Entry point aplikasi
