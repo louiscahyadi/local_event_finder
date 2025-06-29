@@ -46,7 +46,7 @@ class EventDetailScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          'Kategori',
+                          'Musik',
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
@@ -97,7 +97,7 @@ class EventDetailScreen extends StatelessWidget {
                               SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  'Lokasi Event Placeholder',
+                                  'Lokasi Event',
                                   style: TextStyle(fontSize: 16),
                                 ),
                               ),
