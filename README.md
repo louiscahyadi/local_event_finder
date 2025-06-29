@@ -6,7 +6,7 @@ Aplikasi Flutter untuk mencari dan menambahkan event lokal berdasarkan lokasi pe
 
 - Autentikasi pengguna (Login & Register)
 - Tambah dan edit event
-- Pemilihan lokasi event menggunakan peta (Google Maps)
+- Pemilihan lokasi event menggunakan peta
 - Penyimpanan data lokal dengan SQLite
 - State management menggunakan Provider
 
