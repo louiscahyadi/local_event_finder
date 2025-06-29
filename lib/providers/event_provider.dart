@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../models/event.dart';
+import 'package:sqflite/sqflite.dart';
 
 class EventProvider with ChangeNotifier {
   final List<Event> _events = [];
@@ -10,7 +11,7 @@ class EventProvider with ChangeNotifier {
     // Dummy data jika dibutuhkan
     _events.addAll([
       Event(
-        id: '1',
+        id: 1,
         title: 'Festival Musik',
         description: 'Nikmati konser live dari band lokal!',
         date: '2025-07-01',
@@ -24,7 +25,7 @@ class EventProvider with ChangeNotifier {
   void addEvent(Event event) {
     // Simulasikan generate ID otomatis
     final newEvent = Event(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: DateTime.now().millisecondsSinceEpoch,
       title: event.title,
       description: event.description,
       date: event.date,
@@ -46,5 +47,14 @@ class EventProvider with ChangeNotifier {
   void deleteEvent(String id) {
     _events.removeWhere((event) => event.id == id);
     notifyListeners();
+  }
+
+  Future<void> saveEventToDatabase(Event event, Database db) async {
+    await db.update(
+      'events',
+      event.toMap(),
+      where: 'id = ?',
+      whereArgs: [event.id],
+    );
   }
 }
